@@ -115,10 +115,8 @@ func main() {
 	var hostname string
 	fmt.Print("Enter the hostname or IP address to scan: ")
 	fmt.Scanln(&hostname)
-	//hostname := "aryan4.com.np" // Replace with the actual hostname or IP address
 	PerformNSLookup(hostname)
 
-	// Assume the hostname is an IP address or resolve it
 	ip := hostname
 	if ips, err := net.LookupIP(hostname); err == nil && len(ips) > 0 {
 		ip = ips[0].String()
