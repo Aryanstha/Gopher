@@ -12,7 +12,6 @@ import (
 	"golang.org/x/sync/semaphore"
 )
 
-// Define a map of common port numbers to service names
 var commonServices = map[int]string{
 	21:   "FTP",
 	22:   "SSH",
@@ -24,7 +23,6 @@ var commonServices = map[int]string{
 	143:  "IMAP",
 	443:  "HTTPS",
 	3306: "MySQL",
-	// Add more ports and services as needed
 }
 
 type PortScanner struct {
@@ -36,14 +34,13 @@ type PortScanner struct {
 }
 
 func GetMaxFileDescriptors() int64 {
-	// Return a fixed number or implement logic to determine this dynamically
 	return 2048
 }
 
 func NewPortScanner(ip string, timeout time.Duration) *PortScanner {
 	return &PortScanner{
 		ip:      ip,
-		ports:   make([]int, 1024), // Reduced for example; adjust as needed
+		ports:   make([]int, 65535),
 		timeout: timeout,
 		results: make([]string, 0),
 		lock:    &sync.Mutex{},
@@ -135,7 +132,6 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, PerformNSLookup(hostname))
 	fmt.Fprintln(w, PerformDNSLookup(hostname))
 
-	// Assume hostname is an IP address or resolve it
 	ip, _ := net.LookupHost(hostname)
 	if len(ip) == 0 {
 		fmt.Fprintf(w, "Failed to resolve hostname: %s\n", hostname)
