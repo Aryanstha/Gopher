@@ -32,12 +32,12 @@ go build -o gopher
 
 ### CLI
 <p align="center">
-  <img src="/demo/api.png" alt="Gopher CLI Demo">
+  <img src="/demo/cli.png" alt="Gopher CLI Demo">
 </p>
 
 ### Backend (api)
 <p align="center">
-  <img src="/demo/cli.pngg alt="Gopher API Demo">
+  <img src="/demo/api.png alt="Gopher API Demo">
 </p>
 
 
