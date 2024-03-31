@@ -1,0 +1,47 @@
+keywords:
+PR and Marketing Company
+Database and file system hosted on your private corporate network
+one to one encrypted messaging app
+
+Attack vector and Attack Surface:
+
+Attack Surface: The attack surface is the number of all possible points, or attack vectors, where an unauthorized user can access a system and extract data1. It includes all the hardware and software that connect to an organization’s network, such as applications, code, ports, servers, and websites1.
+Attack Vector: An attack vector is the method a cyber criminal uses to gain unauthorized access or breach a user’s accounts or an organization’s systems1. Common attack vector types include phishing, malware, compromised passwords, and encryption issues1.
+Digital Attack Surface: The digital attack surface area encompasses all the hardware and software that connect to an organization’s network1.
+Physical Attack Surface: The physical attack surface comprises all endpoint devices that an attacker can gain physical access to, such as desktop computers, hard drives, laptops, mobile phones, and Universal Serial Bus (USB) drives1.
+Phishing: This attack vector involves cyber criminals sending a communication from what appears to be a trusted sender to convince the victim into giving up valuable information1.
+Malware: Malware refers to malicious software, such as ransomware, Trojans, and viruses1.
+Compromised Passwords: One of the most common attack vectors is compromised passwords, which comes as a result of people using weak or reused passwords on their online accounts1.
+Encryption Issues: Encryption is designed to hide the meaning of a message and prevent unauthorized entities from viewing it by converting it into code1.
+
+## Attack Surface and Vectors in the PR and Marketing Company Scenario
+
+
+
+
+    Physical Attack Surface: This includes all the physical components like servers, computers, phones, and offices. It is anything tangible that can be physically accessed or compromised.
+    Digital Attack Surface: This encompasses the software, networks, and technology stack your organization uses. It includes:
+
+    Web applications and websites.
+    Network equipment like routers and switches.
+    Cloud services, storage solutions, and accounts.
+    Software vulnerabilities on unpatched or outdated components.
+
+    Human Attack Surface: Often overlooked, this involves the people in your organization. Employees can be vulnerable to:
+
+    Social engineering attacks like phishing.
+    Insider threats, either intentional or accidental.
+
+
+    Phishing: A form of social engineering where attackers trick victims into giving away sensitive information or access.
+    Malware: Malicious software, including viruses, worms, trojans, and ransomware, that disrupts or damages a system.
+    SQL Injection: An attack that involves injecting malicious language into SQL queries to manipulate databases into doing something that they were not meant to do.
+    Zero-Day Exploits: These are attacks targeting vulnerabilities that are not yet known to the software vendor or the public.
+    Man-in-the-Middle (MitM) Attacks: The attacker secretly intercepts and possibly alters the communication between two unknowing parties.
+    Denial-of-Service (DoS) Attacks: These attacks aim to shut down a network or service, making it inaccessible to its intended users.
+    Weak and Stolen Credentials: This involves attackers gaining unauthorized access through compromised or easily guessable usernames and passwords. Weak credentials are often the result of poor password management or phishing attacks.
+    Misconfigurations: These occur when security settings are not correctly configured, leaving systems vulnerable. Common examples include unsecured databases, default settings, or open cloud storage.
+    Missing Encryption: Refers to the absence of encryption in data storage or transmission, making sensitive information susceptible to interception and unauthorized access.
+    Malicious Insiders: Involves threats from individuals within the organization who abuse their access rights to steal or manipulate data for personal gain or to cause harm to the organization.
+    Vulnerabilities: These are flaws or weaknesses in software and hardware that can be exploited by attackers to gain unauthorized access or cause harm. This includes everything from outdated software to unpatched security flaws.
+    API Attacks: Attacks targeting the vulnerabilities in Application Programming Interfaces (APIs). These can include injection attacks, broken authentication, or exposure of sensitive data due to inadequate security measures.

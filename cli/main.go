@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"net/http"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -111,6 +112,69 @@ func PerformNSLookup(domain string) {
 	}
 }
 
+func CheckRobotsTxt(hostname string) {
+	resp, err := http.Get(fmt.Sprintf("http://%s/robots.txt", hostname))
+	if err != nil {
+		fmt.Printf("Error fetching robots.txt: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("robots.txt found!")
+	} else {
+		fmt.Println("robots.txt not found.")
+	}
+}
+
+func CheckSecurityTxt(hostname string) {
+	resp, err := http.Get(fmt.Sprintf("http://%s/.well-known/security.txt", hostname))
+	if err != nil {
+		fmt.Printf("Error fetching security.txt: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		fmt.Println("security.txt found!")
+	} else {
+		fmt.Println("security.txt not found.")
+	}
+}
+
+func CheckMissingHeaders(hostname string, headers []string) {
+	resp, err := http.Get(fmt.Sprintf("http://%s", hostname))
+	if err != nil {
+		fmt.Printf("Error fetching headers: %v\n", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	missing := make([]string, 0)
+	for _, header := range headers {
+		if resp.Header.Get(header) == "" {
+			missing = append(missing, header)
+		}
+	}
+
+	if len(missing) > 0 {
+		fmt.Printf("Missing headers: %v\n", missing)
+	} else {
+		fmt.Println("All specified headers are present.")
+	}
+}
+
+func WebServer(hostname string) (string, error) {
+	resp, err := http.Get("http://" + hostname)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	serverHeader := resp.Header.Get("Server")
+	return serverHeader, nil
+}
+
 func main() {
 	var hostname string
 	fmt.Print("Enter the hostname or IP address to scan: ")
@@ -118,6 +182,7 @@ func main() {
 	PerformNSLookup(hostname)
 
 	ip := hostname
+
 	if ips, err := net.LookupIP(hostname); err == nil && len(ips) > 0 {
 		ip = ips[0].String()
 		fmt.Printf("Resolved hostname %s to IP %s\n", hostname, ip)
@@ -134,4 +199,19 @@ func main() {
 	}
 
 	ps.Start()
+
+	CheckRobotsTxt(hostname)
+	CheckSecurityTxt(hostname)
+
+	headersToCheck := []string{"X-Frame-Options", "X-XSS-Protection", "Strict-Transport-Security", "Content-Security-Policy"}
+	CheckMissingHeaders(hostname, headersToCheck)
+
+	// Call GetTechStack function
+	WebServer, err := WebServer(hostname)
+	if err != nil {
+		fmt.Println("Error fetching tech stack:", err)
+		return
+	}
+
+	fmt.Println("Web Server:", WebServer)
 }

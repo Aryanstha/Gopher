@@ -3,6 +3,9 @@ package main
 import (
 	"context"
 	"fmt"
+	"html/template"
+	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"strings"
@@ -118,6 +121,68 @@ func PerformDNSLookup(domain string) string {
 	return ipResults.String()
 }
 
+func CheckRobotsTxt(domain string) string {
+	robotsURL := "http://" + domain + "/robots.txt"
+	resp, err := http.Get(robotsURL)
+	if err != nil {
+		return "Failed to fetch robots.txt file: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		return "robots.txt file exists"
+	}
+	return "robots.txt file does not exist"
+}
+
+func CheckSecurityTxt(domain string) string {
+	securityURL := "http://" + domain + "/.well-known/security.txt"
+	resp, err := http.Get(securityURL)
+	if err != nil {
+		return "Failed to fetch security.txt file: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusOK {
+		// If security.txt exists, read its content and return it
+		content, err := ioutil.ReadAll(resp.Body)
+		if err != nil {
+			return "Failed to read security.txt file: " + err.Error()
+		}
+		return string(content)
+	}
+	return "security.txt file does not exist"
+}
+
+func CheckSecurityHeaders(domain string) string {
+	resp, err := http.Get("http://" + domain)
+	if err != nil {
+		return "Failed to fetch website: " + err.Error()
+	}
+	defer resp.Body.Close()
+
+	headers := resp.Header
+	var results strings.Builder
+	results.WriteString("Security Headers:\n")
+	for header, values := range headers {
+		if strings.HasPrefix(header, "X-") || strings.HasPrefix(header, "Content-Security-Policy") || header == "Strict-Transport-Security" {
+			results.WriteString(fmt.Sprintf("%s: %s\n", header, strings.Join(values, ", ")))
+		}
+	}
+	return results.String()
+}
+
+func WebServer(hostname string) (string, error) {
+	resp, err := http.Get("http://" + hostname)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	serverHeader := resp.Header.Get("Server")
+	return serverHeader, nil
+}
+
 func scanHandler(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 	hostname := query.Get("hostname")
@@ -127,26 +192,63 @@ func scanHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Perform and print ping, nslookup, and dnslookup before starting the port scan
-	fmt.Fprintln(w, SimplePing(hostname))
-	fmt.Fprintln(w, PerformNSLookup(hostname))
-	fmt.Fprintln(w, PerformDNSLookup(hostname))
+	// Perform ping, nslookup, and dnslookup before starting the port scan
+	results := "<h2>Network Information:</h2>"
+	results += "<p>"
+	results += "<strong>" + SimplePing(hostname) + "</strong><br>"
+	results += PerformNSLookup(hostname) + "<br>"
+	results += PerformDNSLookup(hostname) + "<br>"
+	results += "</p>"
+
+	serverHeader, err := WebServer(hostname)
+	if err != nil {
+		results += fmt.Sprintf("<p><strong>Failed to get server header: %v</strong></p>", err)
+		fmt.Fprintln(w, results)
+		return
+	}
+	results += "<p><strong>Server Header:</strong> " + serverHeader + "</p>"
 
 	ip, _ := net.LookupHost(hostname)
 	if len(ip) == 0 {
-		fmt.Fprintf(w, "Failed to resolve hostname: %s\n", hostname)
+		results += "<p><strong>Failed to resolve hostname: " + hostname + "</strong></p>"
+		fmt.Fprintln(w, results)
 		return
 	}
 	ps := NewPortScanner(ip[0], 500*time.Millisecond)
 	ps.Start()
 
-	// Return the port scan results
+	// Append the port scan results to the results string
+	results += "<h2>Port Scan Results:</h2>"
+	results += "<ul>"
 	for _, result := range ps.results {
-		fmt.Fprintln(w, result)
+		results += "<li>" + result + "</li>"
+	}
+	results += "</ul>"
+
+	// Render the HTML template with the results
+	tmpl, err := template.New("").Parse(results)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := tmpl.Execute(w, nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 
 func main() {
+	tmpl, err := template.ParseFiles("./index.tmpl")
+	if err != nil {
+		log.Fatalf("template.ParseFiles: %v", err)
+	}
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if err := tmpl.Execute(w, nil); err != nil {
+			log.Printf("tmpl.Execute: %v", err)
+		}
+	})
+
 	http.HandleFunc("/scan", scanHandler)
 	fmt.Println("Starting server on :8080")
 	if err := http.ListenAndServe(":8080", nil); err != nil {
